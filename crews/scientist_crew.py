@@ -5,7 +5,7 @@ from crewai import Agent, Task, Crew, Process, LLM
 
 load_dotenv()
 
-# ── נתיבים ──────────────────────────────────────────────────────────────────
+# ── paths ───────────────────────────────────────────────────────────────────
 BASE_DIR      = Path(__file__).resolve().parent.parent
 ARTIFACTS_DIR = BASE_DIR / "artifacts"
 ARTIFACTS_DIR.mkdir(exist_ok=True)
@@ -17,7 +17,7 @@ MODEL_PKL        = ARTIFACTS_DIR / "model.pkl"
 EVAL_REPORT      = ARTIFACTS_DIR / "evaluation_report.md"
 MODEL_CARD       = ARTIFACTS_DIR / "model_card.md"
 
-# ── מודל משותף לכל ה-agents ─────────────────────────────────────────────────
+# ── shared LLM for all agents ───────────────────────────────────────────────
 llm = LLM(
     model="gpt-4o-mini",
     api_key=os.getenv("OPENAI_API_KEY"),
