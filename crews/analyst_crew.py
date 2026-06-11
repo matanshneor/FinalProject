@@ -31,7 +31,6 @@ ingestion_agent = Agent(
     ),
     llm=llm,
     allow_code_execution=True,
-    verbose=True,
 )
 
 task_ingest = Task(
@@ -64,7 +63,6 @@ eda_agent = Agent(
     ),
     llm=llm,
     allow_code_execution=True,
-    verbose=True,
 )
 
 task_eda = Task(
@@ -113,7 +111,6 @@ insights_agent = Agent(
     ),
     llm=llm,
     allow_code_execution=True,
-    verbose=True,
 )
 
 task_contract = Task(

@@ -292,12 +292,12 @@ An interactive dashboard with three tabs:
 ### Tab 2 — Model Results
 - Side-by-side comparison table (Linear Regression vs. Random Forest)
 - Metrics: RMSE, MAE, R²
-- Feature importance chart (top 10 features)
+- Feature importance chart (top 5 features)
 
 ### Tab 3 — Predict Sales
-- Input form: Store, Month, Holiday flag, Temperature, Fuel Price, CPI, Unemployment
+- Input form: Store, Year, Month, Week, Is_Quarter_End, Holiday flag, Temperature, Fuel Price, CPI, Unemployment, Last Week's Sales, 4-Week Rolling Avg
 - Loads `model.pkl` and returns a real-time sales prediction
-- Displays confidence context based on training data range
+- Displays comparison against the store's historical average
 
 ---
 

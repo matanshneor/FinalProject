@@ -37,7 +37,6 @@ feature_agent = Agent(
     ),
     llm=llm,
     allow_code_execution=True,
-    verbose=True,
 )
 
 task_features = Task(
@@ -77,7 +76,6 @@ modeling_agent = Agent(
     ),
     llm=llm,
     allow_code_execution=True,
-    verbose=True,
 )
 
 task_modeling = Task(
@@ -137,7 +135,6 @@ modelcard_agent = Agent(
     ),
     llm=llm,
     allow_code_execution=True,
-    verbose=True,
 )
 
 task_modelcard = Task(
