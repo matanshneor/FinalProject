@@ -49,11 +49,13 @@ task_features = Task(
 
     STEP 2 — Engineer new features using pandas:
     - Parse Date to datetime if not already
+    - Sort by Store then Date (ascending) — this is critical to prevent data leakage
     - Add: Year, Month, Week (ISO week number), Is_Quarter_End (1 if month in [3,6,9,12])
-    - Add lag features grouped by Store (sort by Store + Date first):
+    - Add lag features grouped by Store (after sorting):
         Sales_Lag1     = Weekly_Sales shifted 1 week per store
         Sales_Rolling4 = 4-week rolling mean of Weekly_Sales per store
     - Drop rows where Sales_Lag1 is NaN (first week per store has no lag)
+    - Do NOT shuffle the data — preserve chronological order for a correct time-series split
 
     STEP 3 — Save to {FEATURES_CSV} (index=False)
     Print the shape and first 3 rows of the resulting dataframe.
@@ -87,7 +89,16 @@ task_modeling = Task(
                          Holiday_Flag, Temperature, Fuel_Price, CPI,
                          Unemployment, Sales_Lag1, Sales_Rolling4
     Target (y): Weekly_Sales
-    Split: 80% train / 20% test using train_test_split with random_state=42
+
+    IMPORTANT — use a chronological split, NOT a random split.
+    The data is already sorted by date from the feature engineering step.
+    Split by position (80% first rows = past, 20% last rows = future):
+        split_idx = int(len(df) * 0.8)
+        train = df.iloc[:split_idx]
+        test  = df.iloc[split_idx:]
+        X_train, y_train = train[feature_cols], train["Weekly_Sales"]
+        X_test,  y_test  = test[feature_cols],  test["Weekly_Sales"]
+    This ensures the model always trains on the past and is tested on the future.
 
     STEP 2 — Train both models:
     Model A: LinearRegression  (from sklearn.linear_model)
