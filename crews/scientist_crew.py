@@ -106,7 +106,8 @@ task_modeling = Task(
 
     STEP 3 — Evaluate both on the test set:
     Calculate for each: RMSE, MAE, R²
-    (use mean_squared_error with squared=False for RMSE, mean_absolute_error, r2_score)
+    (use root_mean_squared_error for RMSE, mean_absolute_error for MAE, r2_score for R²
+     — all from sklearn.metrics. Do NOT use mean_squared_error with squared=False, it is deprecated)
 
     STEP 4 — Save the better model (higher R²) to {MODEL_PKL} using joblib.dump
 
@@ -116,6 +117,7 @@ task_modeling = Task(
     - A "Feature Importance" section (only for Random Forest — top 5 features)
     """,
     agent=modeling_agent,
+    context=[task_features],
     expected_output=(
         f"model.pkl saved to {ARTIFACTS_DIR}, "
         f"evaluation_report.md saved to {ARTIFACTS_DIR}."
@@ -173,6 +175,7 @@ task_modelcard = Task(
     A short Python snippet showing how to load model.pkl and predict for new data.
     """,
     agent=modelcard_agent,
+    context=[task_modeling],
     expected_output=f"model_card.md saved to {ARTIFACTS_DIR}.",
 )
 

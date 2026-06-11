@@ -70,6 +70,7 @@ eda_agent = Agent(
 task_eda = Task(
     description=f"""
     Using pandas, matplotlib, and seaborn:
+    Note: use matplotlib.use('Agg') before importing pyplot to avoid display errors.
 
     STEP 1 — Clean the data:
     - Load {DATA_PATH}
@@ -92,6 +93,7 @@ task_eda = Task(
     Use basic HTML (no external CSS needed).
     """,
     agent=eda_agent,
+    context=[task_ingest],
     expected_output=(
         "clean_data.csv saved, 4 PNG charts saved, and eda_report.html saved — "
         "all inside the artifacts/ folder."
@@ -144,6 +146,7 @@ task_contract = Task(
     }}
     """,
     agent=insights_agent,
+    context=[task_eda],
     expected_output="insights.md and dataset_contract.json saved to artifacts/.",
 )
 
