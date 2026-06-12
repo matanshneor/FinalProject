@@ -114,6 +114,10 @@ task_modeling = Task(
     - A results table comparing both models (RMSE, MAE, R²)
     - A "Winner" section stating which model won and why
     - A "Feature Importance" section (only for Random Forest — top 5 features)
+
+    CRITICAL INSTRUCTION: Execute ALL steps (load, train, evaluate, save model, write report)
+    in a SINGLE code block. Do NOT split into multiple separate code calls.
+    Variables do not persist between code executions — everything must run together.
     """,
     agent=modeling_agent,
     context=[task_features],
