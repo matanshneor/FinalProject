@@ -2,6 +2,9 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from crewai import Agent, Task, Crew, Process, LLM
+from crewai_tools import CodeInterpreterTool
+
+code_tool = CodeInterpreterTool(unsafe_mode=True)
 
 load_dotenv()
 
@@ -30,8 +33,7 @@ ingestion_agent = Agent(
         "to inspect data and report issues clearly."
     ),
     llm=llm,
-    allow_code_execution=True,
-    code_execution_mode="unsafe",
+    tools=[code_tool],
 )
 
 task_ingest = Task(
@@ -63,8 +65,7 @@ eda_agent = Agent(
         "using pandas, matplotlib, and seaborn."
     ),
     llm=llm,
-    allow_code_execution=True,
-    code_execution_mode="unsafe",
+    tools=[code_tool],
 )
 
 task_eda = Task(
@@ -112,8 +113,7 @@ insights_agent = Agent(
         "the Data Scientist team knows exactly what to expect from the dataset."
     ),
     llm=llm,
-    allow_code_execution=True,
-    code_execution_mode="unsafe",
+    tools=[code_tool],
 )
 
 task_contract = Task(

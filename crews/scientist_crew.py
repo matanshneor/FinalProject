@@ -2,6 +2,9 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from crewai import Agent, Task, Crew, Process, LLM
+from crewai_tools import CodeInterpreterTool
+
+code_tool = CodeInterpreterTool(unsafe_mode=True)
 
 load_dotenv()
 
@@ -36,8 +39,7 @@ feature_agent = Agent(
         "You validate data contracts before touching any data."
     ),
     llm=llm,
-    allow_code_execution=True,
-    code_execution_mode="unsafe",
+    tools=[code_tool],
 )
 
 task_features = Task(
@@ -76,8 +78,7 @@ modeling_agent = Agent(
         "and choose the winner based on objective metrics."
     ),
     llm=llm,
-    allow_code_execution=True,
-    code_execution_mode="unsafe",
+    tools=[code_tool],
 )
 
 task_modeling = Task(
@@ -136,8 +137,7 @@ modelcard_agent = Agent(
         "it performs, its limitations, and any ethical concerns."
     ),
     llm=llm,
-    allow_code_execution=True,
-    code_execution_mode="unsafe",
+    tools=[code_tool],
 )
 
 task_modelcard = Task(
