@@ -2,9 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from crewai import Agent, Task, Crew, Process, LLM
-from crewai_tools import CodeInterpreterTool
-
-code_tool = CodeInterpreterTool(unsafe_mode=True)
+from tools import code_tool
 
 load_dotenv()
 
