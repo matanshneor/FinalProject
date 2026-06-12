@@ -25,10 +25,9 @@ class LocalPythonTool(BaseTool):
             text=True,
             timeout=180,
         )
-        output = result.stdout
-        if result.stderr:
-            output += f"\nSTDERR:\n{result.stderr}"
-        return output.strip() or "(no output)"
+        if result.returncode == 0:
+            return result.stdout.strip() or "Code executed successfully."
+        return f"ERROR:\n{result.stderr.strip()}"
 
 
 code_tool = LocalPythonTool()
