@@ -15,9 +15,14 @@ venv/
 # macOS
 .DS_Store
 
-# Artifacts that are auto-generated (keep the folder, ignore large binaries)
+# Artifacts — ignore large/generated files, keep small readable outputs
 artifacts/*.pkl
 artifacts/*.joblib
+artifacts/*.csv
+artifacts/*.html
+artifacts/*.png
+artifacts/*.log
+pipeline.log
 
 # Claude Code memory (local only)
 .claude/
