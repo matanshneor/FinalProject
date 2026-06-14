@@ -50,11 +50,17 @@ task_features = Task(
     STEP 2 — Engineer new features using pandas:
     - Parse Date to datetime if not already
     - Sort by Store then Date (ascending) — this is critical to prevent data leakage
-    - Add: Year, Month, Week (ISO week number), Is_Quarter_End (1 if month in [3,6,9,12])
-    - Add lag features grouped by Store (after sorting):
-        Sales_Lag1     = Weekly_Sales shifted 1 week per store
-        Sales_Rolling4 = 4-week rolling mean of Weekly_Sales per store
-    - Drop rows where Sales_Lag1 is NaN (first week per store has no lag)
+    - Add: Year, Month, Week, Is_Quarter_End (1 if month in [3,6,9,12])
+      For Week use EXACTLY this syntax (dt.week was removed in pandas 2.0):
+          df['Week'] = df['Date'].dt.isocalendar().week.astype(int)
+    - Add lag features using transform (required for correct index alignment).
+      IMPORTANT: shift BEFORE rolling to avoid data leakage (do NOT include the current week in the window):
+          df['Sales_Lag1'] = df.groupby('Store')['Weekly_Sales'].transform(
+              lambda x: x.shift(1))
+          df['Sales_Rolling4'] = df.groupby('Store')['Weekly_Sales'].transform(
+              lambda x: x.shift(1).rolling(4, min_periods=1).mean())
+      Sales_Rolling4 must be the 4-week trailing average of PAST weeks only (t-1, t-2, t-3, t-4).
+    - Drop rows where Sales_Lag1 is NaN OR Sales_Rolling4 is NaN (first weeks per store)
     - Do NOT shuffle the data — preserve chronological order for a correct time-series split
 
     STEP 3 — Save to {FEATURES_CSV} (index=False)
@@ -89,15 +95,22 @@ task_modeling = Task(
                          Unemployment, Sales_Lag1, Sales_Rolling4
     Target (y): Weekly_Sales
 
+    First, drop any rows with NaN in any feature or target column:
+        feature_cols = ["Store","Year","Month","Week","Is_Quarter_End",
+                        "Holiday_Flag","Temperature","Fuel_Price","CPI",
+                        "Unemployment","Sales_Lag1","Sales_Rolling4"]
+        df = df.dropna(subset=feature_cols + ["Weekly_Sales"])
+
     IMPORTANT — use a chronological split, NOT a random split.
-    The data is already sorted by date from the feature engineering step.
-    Split by position (80% first rows = past, 20% last rows = future):
+    Feature engineering sorted by Store then Date. Before splitting, re-sort by Date ONLY
+    (across all stores) so the 80/20 split is temporal, not store-based:
+        df = df.sort_values("Date").reset_index(drop=True)
         split_idx = int(len(df) * 0.8)
         train = df.iloc[:split_idx]
         test  = df.iloc[split_idx:]
         X_train, y_train = train[feature_cols], train["Weekly_Sales"]
         X_test,  y_test  = test[feature_cols],  test["Weekly_Sales"]
-    This ensures the model always trains on the past and is tested on the future.
+    This ensures the model trains on all stores' early weeks and tests on all stores' later weeks.
 
     STEP 2 — Train both models:
     Model A: LinearRegression  (from sklearn.linear_model)
@@ -110,10 +123,20 @@ task_modeling = Task(
 
     STEP 4 — Save the better model (higher R²) to {MODEL_PKL} using joblib.dump
 
-    STEP 5 — Write {EVAL_REPORT} as markdown with:
-    - A results table comparing both models (RMSE, MAE, R²)
-    - A "Winner" section stating which model won and why
-    - A "Feature Importance" section (only for Random Forest — top 5 features)
+    STEP 5 — Write {EVAL_REPORT} as markdown.
+    Build the content using a lines list + join (do NOT use triple-quoted strings or f-strings):
+        lines = []
+        lines.append("# Model Evaluation Report")
+        lines.append("")
+        lines.append("## Results")
+        lines.append("| Model | RMSE | MAE | R² |")
+        lines.append("|-------|------|-----|-----|")
+        lines.append("| Linear Regression | " + str(round(rmse_a,2)) + " | ... | ... |")
+        lines.append("| Random Forest | " + str(round(rmse_b,2)) + " | ... | ... |")
+        ...
+        with open(eval_path, "w") as f:
+            f.write("\\n".join(lines))
+    The file must contain: a results table (RMSE, MAE, R²), a Winner section, and Feature Importance (top 5 for RF).
 
     CRITICAL INSTRUCTION: Execute ALL steps (load, train, evaluate, save model, write report)
     in a SINGLE code block. Do NOT split into multiple separate code calls.

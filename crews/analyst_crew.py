@@ -116,32 +116,44 @@ insights_agent = Agent(
 
 task_contract = Task(
     description=f"""
-    Load {ARTIFACTS_DIR / 'clean_data.csv'} and produce two output files:
+    Load {ARTIFACTS_DIR / 'clean_data.csv'} and produce two output files.
 
-    OUTPUT 1 — {ARTIFACTS_DIR / 'insights.md'}
-    Write a markdown file with the following sections:
-    - ## Key Findings  (top 5 data-driven findings, e.g. top store, holiday effect, seasonal trends)
-    - ## Correlation Summary  (which features correlate most with Weekly_Sales)
-    - ## Business Recommendations  (2-3 actionable recommendations)
+    IMPORTANT: Write ALL code in a single code block. Do NOT use f-strings or triple-quoted strings.
+    Build strings by concatenating lines with + or by using a list and join().
+    Use True/False (Python booleans), NOT true/false.
 
-    OUTPUT 2 — {ARTIFACTS_DIR / 'dataset_contract.json'}
-    Write a JSON file that defines the dataset schema for the Data Scientist crew.
-    Include for each column: type, nullable (true/false), and any constraints
-    (range, allowed_values, format).
-    Also include a top-level "assumptions" list and "required_columns" list.
+    STEP 1 — Load and prepare data, then compute values:
+    - Load the CSV and immediately parse the Date column:
+          df = pd.read_csv(path)
+          df['Date'] = pd.to_datetime(df['Date'])
+    - Compute:
+        top_store:    store number with highest total Weekly_Sales (groupby + sum + idxmax)
+        holiday_avg:  dict mapping Holiday_Flag (0,1) to mean Weekly_Sales
+        month_avg:    dict mapping month number to mean Weekly_Sales (group by df['Date'].dt.month)
+        top_corr:     top 3 column names most correlated with Weekly_Sales (excluding Weekly_Sales)
+                      Use: df.corr(numeric_only=True)["Weekly_Sales"]
 
-    Example structure:
-    {{
-      "version": "1.0",
-      "required_columns": ["Store", "Date", "Weekly_Sales", ...],
-      "columns": {{
-        "Store":        {{"type": "int64",   "nullable": false, "range": [1, 45]}},
-        "Weekly_Sales": {{"type": "float64", "nullable": false, "min": 0}},
-        "Holiday_Flag": {{"type": "int64",   "nullable": false, "allowed_values": [0, 1]}},
-        "Date":         {{"type": "datetime","nullable": false, "format": "%Y-%m-%d"}}
-      }},
-      "assumptions": ["No missing values", "One row per store per week"]
-    }}
+    STEP 2 — Write {ARTIFACTS_DIR / 'insights.md'} using a list of lines joined with newline.
+    Example pattern:
+        lines = []
+        lines.append("## Key Findings")
+        lines.append("1. Top Store: " + str(top_store))
+        ...
+        with open(path, "w") as f:
+            f.write("\\n".join(lines))
+
+    The file must contain:
+    - ## Key Findings  (5 findings using the computed values)
+    - ## Correlation Summary  (top 3 features correlated with Weekly_Sales)
+    - ## Business Recommendations  (3 actionable recommendations)
+
+    STEP 3 — Write {ARTIFACTS_DIR / 'dataset_contract.json'} using json.dump.
+    Build the dict in Python (use True/False, not true/false), then dump it.
+    Must include: version, required_columns, columns (with type/nullable/constraints), assumptions.
+    required_columns must be: ["Store", "Date", "Weekly_Sales", "Holiday_Flag",
+                               "Temperature", "Fuel_Price", "CPI", "Unemployment"]
+
+    Print "insights.md saved" and "dataset_contract.json saved" when done.
     """,
     agent=insights_agent,
     context=[task_eda],

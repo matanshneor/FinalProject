@@ -33,7 +33,7 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler(ARTIFACTS_DIR / "pipeline.log", encoding="utf-8"),
+        logging.FileHandler(ARTIFACTS_DIR / "pipeline.log", encoding="utf-8", mode="w"),
     ],
 )
 log = logging.getLogger("walmart_flow")
